@@ -22,7 +22,7 @@ public class PanelJuego extends JPanel {
     Figuras figuras = new Figuras();
     Teclado teclado = new Teclado();
 
-    private int avancePajaro, tiempoSubida, movimientoPaisaje;
+    private int avancePajaro, tiempoSubida, movimientoPaisaje, movimientoPiso;
     private double caidaPajaro;
 
     public PanelJuego() {
@@ -33,6 +33,7 @@ public class PanelJuego extends JPanel {
         avancePajaro = 0;
         tiempoSubida = 0;
         movimientoPaisaje = 0;
+        movimientoPiso = 0;
         animacion();
     }
 
@@ -43,6 +44,7 @@ public class PanelJuego extends JPanel {
                 caidaPajaro();
                 saltoPajaro();
                 moverFondo();
+                moverPiso();
                 repaint();
             }
 
@@ -69,12 +71,23 @@ public class PanelJuego extends JPanel {
 
     public void moverFondo() {
         movimientoPaisaje -= 2;
-        reiniciarImagen();
+        reiniciarFondo();
     }
 
-    public void reiniciarImagen() {
-        if (this.getWidth() == Math.abs(movimientoPaisaje)) {
+    public void reiniciarFondo() {
+        if (this.getWidth() < Math.abs(movimientoPaisaje)) {
             movimientoPaisaje = this.getWidth();
+        }
+    }
+    
+    public void moverPiso() {
+        movimientoPiso -= 6;
+        reiniciarPiso();
+    }
+    
+    public void reiniciarPiso() {
+        if (this.getWidth() < Math.abs(movimientoPiso)) {
+            movimientoPiso = this.getWidth();
         }
     }
 
@@ -97,7 +110,12 @@ public class PanelJuego extends JPanel {
     }
 
     public void dibujarPiso(Graphics2D graphics2D) {
-        graphics2D.drawImage(imagenes.piso(), 0, 530, this.getWidth(), 200, this);
+        graphics2D.drawImage(imagenes.piso(), movimientoPiso, 530, this.getWidth(), 200, this);
+        if (movimientoPiso < 0) {
+            graphics2D.drawImage(imagenes.piso(), movimientoPiso + this.getWidth(), 530, this.getWidth(), 200, this);
+        } else {
+            graphics2D.drawImage(imagenes.piso(), movimientoPiso - this.getWidth(), 530, this.getWidth(), 200, this);
+        }
     }
 
     public void dibujarPajaro(Graphics2D graphics2D) {
