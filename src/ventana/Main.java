@@ -16,7 +16,7 @@ public class Main {
         
         ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         ventana.setSize(500, 700);
-//        ventana.setResizable(false);
+        ventana.setResizable(false);
         ventana.setLocationRelativeTo(null);
         ventana.add(panelJuego);
         ventana.setVisible(true);

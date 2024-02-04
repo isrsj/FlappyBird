@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+import teclado.Teclado;
 
 /**
  *
@@ -19,23 +20,27 @@ public class PanelJuego extends JPanel {
 
     Imagenes imagenes = new Imagenes();
     Figuras figuras = new Figuras();
-    Calculos calculos = new Calculos();
+    Teclado teclado = new Teclado();
 
-    private int avancePajaro;
+    private int avancePajaro, tiempoSubida;
     private double caidaPajaro;
 
     public PanelJuego() {
         this.setLayout(null);
+        this.addKeyListener(teclado);
+        this.setFocusable(true);
         caidaPajaro = 30;
         avancePajaro = 0;
+        tiempoSubida = 0;
         animacion();
     }
 
     public void animacion() {
-        Timer timer = new Timer(10, new ActionListener() {
+        Timer timer = new Timer(0, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 caidaPajaro();
+                saltoPajaro();
             }
 
         });
@@ -44,7 +49,19 @@ public class PanelJuego extends JPanel {
 
     public void caidaPajaro() {
         avancePajaro = 100;
-        caidaPajaro += 15;
+        if (!teclado.getSpace() && caidaPajaro < 510) {
+            caidaPajaro += 8;
+        }
+    }
+
+    public void saltoPajaro() {
+        if (teclado.getSpace() && caidaPajaro < 510 && tiempoSubida < 20) {
+            caidaPajaro -= 3;
+            tiempoSubida++;
+        } else {
+            teclado.setSpace(false);
+            tiempoSubida = 0;
+        }
     }
 
     @Override
