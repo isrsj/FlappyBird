@@ -1,7 +1,6 @@
 package paneles;
 
-import calculos.MRU;
-import calculos.MRUV;
+import calculos.Calculos;
 import figuras.Figuras;
 import imagenes.Imagenes;
 import java.awt.Graphics;
@@ -20,14 +19,15 @@ public class PanelJuego extends JPanel {
 
     Imagenes imagenes = new Imagenes();
     Figuras figuras = new Figuras();
-    MRU mru = new MRU();
-    MRUV mruv = new MRUV();
+    Calculos calculos = new Calculos();
 
-    private int caidaPajaro, avancePajaro;
+    private int avancePajaro;
+    private double caidaPajaro;
 
     public PanelJuego() {
         this.setLayout(null);
-        caidaPajaro = 0;
+        caidaPajaro = 30;
+        avancePajaro = 0;
         animacion();
     }
 
@@ -35,16 +35,16 @@ public class PanelJuego extends JPanel {
         Timer timer = new Timer(10, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                caidaParabolica();
+                caidaPajaro();
             }
 
         });
         timer.start();
     }
 
-    public void caidaParabolica() {
-        caidaPajaro = (int) mru.posicionCoordenada();
-        avancePajaro = -(int) mruv.posicionCoordenada();
+    public void caidaPajaro() {
+        avancePajaro = 100;
+        caidaPajaro += 15;
     }
 
     @Override
