@@ -22,7 +22,7 @@ public class PanelJuego extends JPanel {
     Figuras figuras = new Figuras();
     Teclado teclado = new Teclado();
 
-    private int avancePajaro, tiempoSubida;
+    private int avancePajaro, tiempoSubida, movimientoPaisaje;
     private double caidaPajaro;
 
     public PanelJuego() {
@@ -32,15 +32,18 @@ public class PanelJuego extends JPanel {
         caidaPajaro = 30;
         avancePajaro = 0;
         tiempoSubida = 0;
+        movimientoPaisaje = 0;
         animacion();
     }
 
     public void animacion() {
-        Timer timer = new Timer(0, new ActionListener() {
+        Timer timer = new Timer(10, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 caidaPajaro();
                 saltoPajaro();
+                moverFondo();
+                repaint();
             }
 
         });
@@ -50,7 +53,7 @@ public class PanelJuego extends JPanel {
     public void caidaPajaro() {
         avancePajaro = 100;
         if (!teclado.getSpace() && caidaPajaro < 510) {
-            caidaPajaro += 8;
+            caidaPajaro += 7;
         }
     }
 
@@ -64,6 +67,17 @@ public class PanelJuego extends JPanel {
         }
     }
 
+    public void moverFondo() {
+        movimientoPaisaje -= 2;
+        reiniciarImagen();
+    }
+
+    public void reiniciarImagen() {
+        if (this.getWidth() == Math.abs(movimientoPaisaje)) {
+            movimientoPaisaje = this.getWidth();
+        }
+    }
+
     @Override
     public void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
@@ -71,11 +85,15 @@ public class PanelJuego extends JPanel {
         dibujarFondo(graphics2D);
         dibujarPiso(graphics2D);
         dibujarPajaro(graphics2D);
-        repaint();
     }
 
     public void dibujarFondo(Graphics2D graphics2D) {
-        graphics2D.drawImage(imagenes.fondo(), 0, 0, this.getWidth(), this.getHeight(), this);
+        graphics2D.drawImage(imagenes.fondo(), movimientoPaisaje, 0, this.getWidth(), this.getHeight(), this);
+        if (movimientoPaisaje < 0) {
+            graphics2D.drawImage(imagenes.fondo(), movimientoPaisaje + this.getWidth(), 0, this.getWidth(), this.getHeight(), this);
+        } else {
+            graphics2D.drawImage(imagenes.fondo(), movimientoPaisaje - this.getWidth(), 0, this.getWidth(), this.getHeight(), this);
+        }
     }
 
     public void dibujarPiso(Graphics2D graphics2D) {
