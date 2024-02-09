@@ -4,6 +4,7 @@
  */
 package figuras;
 
+import imagenes.Imagenes;
 import java.awt.geom.Rectangle2D;
 
 /**
@@ -11,6 +12,8 @@ import java.awt.geom.Rectangle2D;
  * @author jacob
  */
 public class Figuras {
+    
+    Imagenes imagenes = new Imagenes();
     
     private Rectangle2D cuerpoPajaro;
     
@@ -24,6 +27,10 @@ public class Figuras {
     
     public Rectangle2D getCuerpoPajaro() {
         return cuerpoPajaro;
+    }
+    
+    public Rectangle2D rectangulo(double x, double y, double w, double h) {
+        return new Rectangle2D.Double(x, y, w, h);
     }
     
 }

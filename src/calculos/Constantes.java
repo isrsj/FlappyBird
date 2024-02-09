@@ -10,6 +10,6 @@ package calculos;
  */
 public class Constantes {
     
-    public final double GRAVEDAD = 9.81;
+    public final int MEDIDA_AREA_JUEGO = 530;
     
 }
