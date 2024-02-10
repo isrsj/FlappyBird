@@ -23,9 +23,9 @@ public class PanelJuego extends JPanel {
     Figuras figuras = new Figuras();
     Teclado teclado = new Teclado();
 
-    private int avancePajaro, tiempoSubida, movimientoPaisaje, movimientoPiso, xTuberiaPiso;
-    private Boolean añadido;
-    private double caidaPajaro, coordMayor;
+    private int avancePajaro, tiempoSubida, movimientoPaisaje, movimientoPiso;
+    private Boolean añadido, tuberiaCompletada;
+    private double caidaPajaro, coordMayorPiso, coordMayorTecho;
     private ArrayList<Rectangle2D> tuberiasPiso, tuberiasTecho;
 
     public PanelJuego() {
@@ -37,9 +37,10 @@ public class PanelJuego extends JPanel {
         tiempoSubida = 0;
         movimientoPaisaje = 0;
         movimientoPiso = 0;
-        xTuberiaPiso = 0;
-        coordMayor = 0;
+        coordMayorPiso = 0;
+        coordMayorTecho = 0;
         añadido = false;
+        tuberiaCompletada = false;
         tuberiasPiso = new ArrayList<Rectangle2D>();
         tuberiasTecho = new ArrayList<Rectangle2D>();
         animacion();
@@ -49,14 +50,17 @@ public class PanelJuego extends JPanel {
         Timer timer = new Timer(10, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                // bird
                 caidaPajaro();
                 saltoPajaro();
+                // background
                 moverFondo();
                 moverPiso();
+                // pipe
                 añadirTuberiaPiso();
+                añadirTuberiaTecho();
                 moverTuberiasPiso();
-                xTuberiaPiso++;
-                reiniciarContador();
+                moverTuberiasTecho();
                 repaint();
             }
         });
@@ -105,12 +109,25 @@ public class PanelJuego extends JPanel {
     public void añadirTuberiaPiso() {
         for (int i = 0; i < 5 && !añadido; i++) {
             if (tuberiasPiso.isEmpty()) {
-                tuberiasPiso.add(i, generarTuberia(486));
+                tuberiasPiso.add(i, generarTuberiaPiso(486));
             } else {
-                tuberiasPiso.add(i, generarTuberia(tuberiasPiso.get(i - 1).getX() + 150 + imagenes.tuberia().getWidth()));
+                tuberiasPiso.add(i, generarTuberiaPiso(tuberiasPiso.get(i - 1).getX() + 150 + imagenes.tuberia().getWidth()));
             }
         }
         añadido = true;
+    }
+
+    public void añadirTuberiaTecho() {
+        for (int i = 0; i < tuberiasPiso.size() && !tuberiaCompletada; i++) {
+            tuberiasTecho.add(generarTuberiaTecho(i));
+        }
+        tuberiaCompletada = true;
+    }
+
+    public Rectangle2D generarTuberiaTecho(int i) {
+        double pipeHeight = 530 - 150 - tuberiasPiso.get(i).getHeight();
+        double pipeWidth = imagenes.tuberia().getWidth();
+        return figuras.rectangulo(tuberiasPiso.get(i).getX(), 0, pipeWidth, pipeHeight);
     }
 
     public void moverTuberiasPiso() {
@@ -127,46 +144,61 @@ public class PanelJuego extends JPanel {
     public void reemplazarTuberiaPiso(int i) {
         if (tuberiasPiso.get(i).getX() + tuberiasPiso.get(i).getWidth() < 0) {
             tuberiasPiso.remove(i);
-            buscarCoordenadaMayor();
-            tuberiasPiso.add(i, generarTuberia(coordMayor + 150 + imagenes.tuberia().getWidth()));
+            buscarCoordenadaMayorPiso();
+            tuberiasPiso.add(i, generarTuberiaPiso(coordMayorPiso + 150 + imagenes.tuberia().getWidth()));
+
+            System.out.println(tuberiasPiso.get(i).getY());
         }
     }
 
-    public void buscarCoordenadaMayor() {
+    public void buscarCoordenadaMayorPiso() {
         for (int i = 0; i < tuberiasPiso.size(); i++) {
-            if (coordMayor == 0) {
-                coordMayor = tuberiasPiso.get(i).getX();
+            if (coordMayorPiso == 0) {
+                coordMayorPiso = tuberiasPiso.get(i).getX();
             } else {
-                if (coordMayor < tuberiasPiso.get(i).getX()) {
-                    coordMayor = tuberiasPiso.get(i).getX();
+                if (coordMayorPiso < tuberiasPiso.get(i).getX()) {
+                    coordMayorPiso = tuberiasPiso.get(i).getX();
                 }
             }
         }
     }
 
-    public void reiniciarContador() {
-        if (xTuberiaPiso < 0) {
-            xTuberiaPiso = 486;
-        }
-    }
-
-    public Rectangle2D generarTuberia(double x) {
-        double pipeHeight = Math.random() * (350 - 130 + 1) + 130;
+    public Rectangle2D generarTuberiaPiso(double x) {
+        int pipeHeight = (int) (Math.random() * (350 - 130 + 1) + 130);
         double pipeWidth = imagenes.tuberia().getWidth();
         double y = 530 - pipeHeight;
         return figuras.rectangulo(x, y, pipeWidth, pipeHeight);
     }
-    
-    public void añadirTuberiaTecho() {
-        for (int i = 0; i < tuberiasPiso.size() && !añadido; i++) {
-            generarTuberiaTecho(i);
+
+    public void moverTuberiasTecho() {
+        for (int i = 0; i < tuberiasTecho.size(); i++) {
+            Rectangle2D rInicial = tuberiasTecho.get(i);
+            double y = rInicial.getY();
+            double w = rInicial.getWidth();
+            double h = rInicial.getHeight();
+            tuberiasTecho.set(i, figuras.rectangulo(rInicial.getX() - 4, y, w, h));
+            reemplazarTuberiaTecho(i);
         }
-        añadido = true;
     }
-    public Rectangle2D generarTuberiaTecho(int i) {
-        double pipeHeight = 530-150-tuberiasPiso.get(i).getHeight();
-        double pipeWidth = imagenes.tuberia().getWidth();
-        return figuras.rectangulo(tuberiasPiso.get(i).getX(), 0, pipeWidth, pipeHeight);
+
+    public void reemplazarTuberiaTecho(int i) {
+        if (tuberiasTecho.get(i).getX() + tuberiasTecho.get(i).getWidth() < 0) {
+            tuberiasTecho.remove(i);
+            buscarCoordenadaMayorTecho();
+            tuberiasTecho.add(i, generarTuberiaTecho(i));
+        }
+    }
+
+    public void buscarCoordenadaMayorTecho() {
+        for (int i = 0; i < tuberiasTecho.size(); i++) {
+            if (coordMayorTecho == 0) {
+                coordMayorTecho = tuberiasTecho.get(i).getX();
+            } else {
+                if (coordMayorTecho < tuberiasTecho.get(i).getX()) {
+                    coordMayorTecho = tuberiasTecho.get(i).getX();
+                }
+            }
+        }
     }
 
     @Override
@@ -180,6 +212,12 @@ public class PanelJuego extends JPanel {
             graphics2D.fill(tuberiasPiso.get(2));
             graphics2D.fill(tuberiasPiso.get(3));
             graphics2D.fill(tuberiasPiso.get(4));
+
+            graphics2D.fill(tuberiasTecho.get(0));
+            graphics2D.fill(tuberiasTecho.get(1));
+            graphics2D.fill(tuberiasTecho.get(2));
+            graphics2D.fill(tuberiasTecho.get(3));
+            graphics2D.fill(tuberiasTecho.get(4));
         } catch (Exception e) {
 
         }
