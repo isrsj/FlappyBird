@@ -42,6 +42,10 @@ public class Imagenes {
         return leerImagen("pipeTop.png");
     }
     
+    public BufferedImage numero(String ruta) {
+        return leerImagen (ruta);
+    }
+    
     public TexturePaint crearTexturePaint(BufferedImage bufferedImage, Rectangle2D rectangle) {
         return new TexturePaint(bufferedImage, rectangle);
     }

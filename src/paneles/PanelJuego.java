@@ -25,8 +25,8 @@ public class PanelJuego extends JPanel {
     Teclado teclado = new Teclado();
     PerdidaJuego perdidaJuego = new PerdidaJuego();
 
-    private int avancePajaro, tiempoSubida, movimientoPaisaje, movimientoPiso;
-    private Boolean añadido, tuberiaCompletada;
+    private int avancePajaro, tiempoSubida, movimientoPaisaje, movimientoPiso, contUnidades, contDecenas;
+    private Boolean añadido, tuberiaCompletada, puntajeContado;
     private double caidaPajaro, coordMayorPiso, coordMayorTecho;
     private ArrayList<Rectangle2D> tuberiasPiso, tuberiasTecho;
     private Timer timer;
@@ -44,19 +44,23 @@ public class PanelJuego extends JPanel {
         coordMayorTecho = 0;
         añadido = false;
         tuberiaCompletada = false;
+        puntajeContado = false;
         tuberiasPiso = new ArrayList<Rectangle2D>();
         tuberiasTecho = new ArrayList<Rectangle2D>();
         animacion();
     }
 
     public void animacion() {
-        timer = new Timer(10, new ActionListener() {
+        timer = new Timer(7, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 pararAnimacion();
                 // bird
                 caidaPajaro();
                 saltoPajaro();
+                // puntaje
+                aumentarUnidades();
+                aumentarDecenas();
                 // background
                 moverFondo();
                 moverPiso();
@@ -73,35 +77,53 @@ public class PanelJuego extends JPanel {
     }
 
     public void pararAnimacion() {
-        if (perdidaJuego.estaFueraDelPanel(caidaPajaro)) {
-            timer.stop();
-        }
-        for (int i = 0; i < tuberiasTecho.size() && i < tuberiasTecho.size(); i++) {
-            if (perdidaJuego.choqueConTuberia(figuras.getCuerpoPajaro(), tuberiasTecho.get(i)) || perdidaJuego.choqueConTuberia(figuras.getCuerpoPajaro(), tuberiasPiso.get(i))) {
-                timer.stop();
-            }
-        }
+//        if (perdidaJuego.estaFueraDelPanel(caidaPajaro)) {
+//            timer.stop();
+//        }
+//        for (int i = 0; i < tuberiasTecho.size() && i < tuberiasTecho.size(); i++) {
+//            if (perdidaJuego.choqueConTuberia(figuras.getCuerpoPajaro(), tuberiasTecho.get(i)) || perdidaJuego.choqueConTuberia(figuras.getCuerpoPajaro(), tuberiasPiso.get(i))) {
+//                timer.stop();
+//            }
+//        }
     }
 
     public void caidaPajaro() {
         avancePajaro = 100;
         if (!teclado.getSpace() && caidaPajaro < 510) {
-            caidaPajaro += 10;
+            caidaPajaro += 4;
         }
     }
 
     public void saltoPajaro() {
-        if (teclado.getSpace() && caidaPajaro < 510 && tiempoSubida < 25) {
-            caidaPajaro -= 2.5;
-            tiempoSubida++;
-        } else {
-            teclado.setSpace(false);
-            tiempoSubida = 0;
+        if (teclado.getSpace()) {
+            caidaPajaro -= tiempoSubida;
+            tiempoSubida += 1;
         }
+        if (tiempoSubida == 13) {
+            tiempoSubida = 0;
+            teclado.setSpace(false);
+        }
+    }
+    
+    public void aumentarUnidades() {
+        for (int i = 0; i < tuberiasPiso.size(); i++) {
+            if (tuberiasPiso.get(i).getX() < figuras.getCuerpoPajaro().getX() && !puntajeContado) {
+                contUnidades ++;
+                puntajeContado = true;
+            }
+        }
+    }
+    
+    public void aumentarDecenas() {
+        if (contUnidades == 10) {
+            contUnidades = 0;
+            contDecenas ++;
+        }
+        System.out.println(contDecenas+"   "+contUnidades);
     }
 
     public void moverFondo() {
-        movimientoPaisaje -= 2;
+        movimientoPaisaje -= 3;
         reiniciarFondo();
     }
 
@@ -134,7 +156,7 @@ public class PanelJuego extends JPanel {
             if (tuberiasPiso.isEmpty()) {
                 tuberiasPiso.add(i, generarTuberiaPiso(486));
             } else {
-                tuberiasPiso.add(i, generarTuberiaPiso(tuberiasPiso.get(i - 1).getX() + 90 + imagenes.tuberiaPiso().getWidth()));
+                tuberiasPiso.add(i, generarTuberiaPiso(tuberiasPiso.get(i - 1).getX() + 110 + imagenes.tuberiaPiso().getWidth()));
             }
         }
         añadido = true;
@@ -146,7 +168,7 @@ public class PanelJuego extends JPanel {
             double y = rInicial.getY();
             double w = rInicial.getWidth();
             double h = rInicial.getHeight();
-            tuberiasPiso.set(i, figuras.rectangulo(rInicial.getX() - 4, y, w, h));
+            tuberiasPiso.set(i, figuras.rectangulo(rInicial.getX() - 5, y, w, h));
             reemplazarTuberiaPiso(i);
         }
     }
@@ -155,9 +177,8 @@ public class PanelJuego extends JPanel {
         if (tuberiasPiso.get(i).getX() + tuberiasPiso.get(i).getWidth() < 0) {
             tuberiasPiso.remove(i);
             buscarCoordenadaMayorPiso();
-            tuberiasPiso.add(i, generarTuberiaPiso(coordMayorPiso + 90 + imagenes.tuberiaPiso().getWidth()));
-
-            System.out.println(tuberiasPiso.get(i).getY());
+            tuberiasPiso.add(i, generarTuberiaPiso(coordMayorPiso +110 + imagenes.tuberiaPiso().getWidth()));
+            puntajeContado = false;
         }
     }
 
@@ -192,7 +213,7 @@ public class PanelJuego extends JPanel {
             double y = rInicial.getY();
             double w = rInicial.getWidth();
             double h = rInicial.getHeight();
-            tuberiasTecho.set(i, figuras.rectangulo(rInicial.getX() - 4, y, w, h));
+            tuberiasTecho.set(i, figuras.rectangulo(rInicial.getX() - 5, y, w, h));
             reemplazarTuberiaTecho(i);
         }
     }
@@ -225,6 +246,7 @@ public class PanelJuego extends JPanel {
         dibujarTuberias(graphics2D);
         dibujarPiso(graphics2D);
         dibujarPajaro(graphics2D);
+        dibujarPuntaje(graphics2D);
     }
 
     public void dibujarFondo(Graphics2D graphics2D) {
@@ -274,6 +296,51 @@ public class PanelJuego extends JPanel {
     public TexturePaint texturaPajaro() {
         figuras.setCuerpoPajaro(avancePajaro, caidaPajaro, 34, 24);
         return imagenes.crearTexturePaint(imagenes.pajaro(), figuras.getCuerpoPajaro());
+    }
+    
+    public void dibujarPuntaje(Graphics2D graphics2D){
+        Rectangle2D rUnidades = figuras.rectangulo((this.getWidth()/2)+15 , 30, 30, 45);
+        Rectangle2D rDecenas = figuras.rectangulo((this.getWidth()/2)-15 , 30, 30, 45);
+        graphics2D.setPaint(texturePaintNumero(contDecenas,rDecenas));
+        graphics2D.fill(rDecenas);
+        graphics2D.setPaint(texturePaintNumero(contUnidades,rUnidades));
+        graphics2D.fill(rUnidades);
+    }
+    
+    public TexturePaint texturePaintNumero(int numero, Rectangle2D rectangle) {
+        switch (numero) {
+            case 0 -> {
+                return imagenes.crearTexturePaint(imagenes.numero("0.png"), rectangle);
+            }
+            case 1 -> {
+                return imagenes.crearTexturePaint(imagenes.numero("1.png"), rectangle);
+            }
+            case 2 -> {
+                return imagenes.crearTexturePaint(imagenes.numero("2.png"), rectangle);
+            }
+            case 3 -> {
+                return imagenes.crearTexturePaint(imagenes.numero("3.png"), rectangle);
+            }
+            case 4 -> {
+                return imagenes.crearTexturePaint(imagenes.numero("4.png"), rectangle);
+            }
+            case 5 -> {
+                return imagenes.crearTexturePaint(imagenes.numero("5.png"), rectangle);
+            }
+            case 6 -> {
+                return imagenes.crearTexturePaint(imagenes.numero("6.png"), rectangle);
+            }
+            case 7 -> {
+                return imagenes.crearTexturePaint(imagenes.numero("7.png"), rectangle);
+            }
+            case 8 -> {
+                return imagenes.crearTexturePaint(imagenes.numero("8.png"), rectangle);
+            }
+            case 9 -> {
+                return imagenes.crearTexturePaint(imagenes.numero("9.png"), rectangle);
+            }
+        }
+        return null;
     }
 
 }
