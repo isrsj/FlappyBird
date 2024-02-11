@@ -34,8 +34,12 @@ public class Imagenes {
         return leerImagen("red_bird.png");
     }
     
-    public BufferedImage tuberia () {
-        return leerImagen("pipe.png");
+    public BufferedImage tuberiaPiso () {
+        return leerImagen("pipeFloor.png");
+    }
+    
+    public BufferedImage tuberiaTecho () {
+        return leerImagen("pipeTop.png");
     }
     
     public TexturePaint crearTexturePaint(BufferedImage bufferedImage, Rectangle2D rectangle) {

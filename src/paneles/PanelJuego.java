@@ -8,6 +8,7 @@ import java.awt.TexturePaint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -111,7 +112,7 @@ public class PanelJuego extends JPanel {
             if (tuberiasPiso.isEmpty()) {
                 tuberiasPiso.add(i, generarTuberiaPiso(486));
             } else {
-                tuberiasPiso.add(i, generarTuberiaPiso(tuberiasPiso.get(i - 1).getX() + 150 + imagenes.tuberia().getWidth()));
+                tuberiasPiso.add(i, generarTuberiaPiso(tuberiasPiso.get(i - 1).getX() + 150 + imagenes.tuberiaPiso().getWidth()));
             }
         }
         añadido = true;
@@ -126,7 +127,7 @@ public class PanelJuego extends JPanel {
 
     public Rectangle2D generarTuberiaTecho(int i) {
         double pipeHeight = 530 - 150 - tuberiasPiso.get(i).getHeight();
-        double pipeWidth = imagenes.tuberia().getWidth();
+        double pipeWidth = 80;
         return figuras.rectangulo(tuberiasPiso.get(i).getX(), 0, pipeWidth, pipeHeight);
     }
 
@@ -145,7 +146,7 @@ public class PanelJuego extends JPanel {
         if (tuberiasPiso.get(i).getX() + tuberiasPiso.get(i).getWidth() < 0) {
             tuberiasPiso.remove(i);
             buscarCoordenadaMayorPiso();
-            tuberiasPiso.add(i, generarTuberiaPiso(coordMayorPiso + 150 + imagenes.tuberia().getWidth()));
+            tuberiasPiso.add(i, generarTuberiaPiso(coordMayorPiso + 150 + imagenes.tuberiaPiso().getWidth()));
 
             System.out.println(tuberiasPiso.get(i).getY());
         }
@@ -164,8 +165,8 @@ public class PanelJuego extends JPanel {
     }
 
     public Rectangle2D generarTuberiaPiso(double x) {
-        int pipeHeight = (int) (Math.random() * (350 - 130 + 1) + 130);
-        double pipeWidth = imagenes.tuberia().getWidth();
+        int pipeHeight = (int) (Math.random() * (300 - 130 + 1) + 130);
+        double pipeWidth = 80;
         double y = 530 - pipeHeight;
         return figuras.rectangulo(x, y, pipeWidth, pipeHeight);
     }
@@ -206,21 +207,7 @@ public class PanelJuego extends JPanel {
         super.paintComponent(graphics);
         Graphics2D graphics2D = (Graphics2D) graphics;
         dibujarFondo(graphics2D);
-        try {
-            graphics2D.fill(tuberiasPiso.get(0));
-            graphics2D.fill(tuberiasPiso.get(1));
-            graphics2D.fill(tuberiasPiso.get(2));
-            graphics2D.fill(tuberiasPiso.get(3));
-            graphics2D.fill(tuberiasPiso.get(4));
-
-            graphics2D.fill(tuberiasTecho.get(0));
-            graphics2D.fill(tuberiasTecho.get(1));
-            graphics2D.fill(tuberiasTecho.get(2));
-            graphics2D.fill(tuberiasTecho.get(3));
-            graphics2D.fill(tuberiasTecho.get(4));
-        } catch (Exception e) {
-
-        }
+        dibujarTuberias(graphics2D);
         dibujarPiso(graphics2D);
         dibujarPajaro(graphics2D);
     }
@@ -232,6 +219,27 @@ public class PanelJuego extends JPanel {
         } else {
             graphics2D.drawImage(imagenes.fondo(), movimientoPaisaje - this.getWidth(), 0, this.getWidth(), this.getHeight(), this);
         }
+    }
+
+    public void dibujarTuberias(Graphics2D graphics2D) {
+        try {
+            for (int i = 0; i < tuberiasPiso.size() && i < tuberiasTecho.size(); i++) {
+                graphics2D.setPaint(texturaTuberia(tuberiasPiso.get(i), imagenes.tuberiaPiso()));
+                graphics2D.fill(tuberiasPiso.get(i));
+                graphics2D.setPaint(texturaTuberia(tuberiasTecho.get(i),400, imagenes.tuberiaTecho()));
+                graphics2D.fill(tuberiasTecho.get(i));
+            }
+        } catch (Exception e) {
+
+        }
+    }
+    
+    public TexturePaint texturaTuberia(Rectangle2D r, BufferedImage image) {
+        return imagenes.crearTexturePaint(image, figuras.rectangulo(r.getX(), r.getY(), 80, 400));
+    }
+    
+    public TexturePaint texturaTuberia(Rectangle2D r,int i, BufferedImage image) {
+        return imagenes.crearTexturePaint(image, figuras.rectangulo(r.getX(), r.getHeight()-i, 80, 400));
     }
 
     public void dibujarPiso(Graphics2D graphics2D) {
