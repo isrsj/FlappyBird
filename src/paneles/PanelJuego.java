@@ -23,6 +23,7 @@ public class PanelJuego extends JPanel {
     Imagenes imagenes = new Imagenes();
     Figuras figuras = new Figuras();
     Teclado teclado = new Teclado();
+    PerdidaJuego perdidaJuego = new PerdidaJuego();
 
     private int avancePajaro, tiempoSubida, movimientoPaisaje, movimientoPiso;
     private Boolean añadido, tuberiaCompletada;
@@ -70,18 +71,20 @@ public class PanelJuego extends JPanel {
 
     public void caidaPajaro() {
         avancePajaro = 100;
-        if (!teclado.getSpace() && caidaPajaro < 510) {
+        if (!teclado.getSpace() && caidaPajaro < 510 && !perdidaJuego.estaFueraDelPanel(caidaPajaro)) {
             caidaPajaro += 7;
         }
     }
 
     public void saltoPajaro() {
-        if (teclado.getSpace() && caidaPajaro < 510 && tiempoSubida < 25) {
-            caidaPajaro -= 2.5;
-            tiempoSubida++;
-        } else {
-            teclado.setSpace(false);
-            tiempoSubida = 0;
+        if (!perdidaJuego.estaFueraDelPanel(caidaPajaro)) {
+            if (teclado.getSpace() && caidaPajaro < 510 && tiempoSubida < 25) {
+                caidaPajaro -= 3;
+                tiempoSubida++;
+            } else {
+                teclado.setSpace(false);
+                tiempoSubida = 0;
+            }
         }
     }
 
@@ -107,28 +110,22 @@ public class PanelJuego extends JPanel {
         }
     }
 
+    public Rectangle2D generarTuberiaPiso(double x) {
+        int pipeHeight = (int) (Math.random() * (300 - 130 + 1) + 130);
+        double pipeWidth = 80;
+        double y = 530 - pipeHeight;
+        return figuras.rectangulo(x, y, pipeWidth, pipeHeight);
+    }
+
     public void añadirTuberiaPiso() {
         for (int i = 0; i < 5 && !añadido; i++) {
             if (tuberiasPiso.isEmpty()) {
                 tuberiasPiso.add(i, generarTuberiaPiso(486));
             } else {
-                tuberiasPiso.add(i, generarTuberiaPiso(tuberiasPiso.get(i - 1).getX() + 150 + imagenes.tuberiaPiso().getWidth()));
+                tuberiasPiso.add(i, generarTuberiaPiso(tuberiasPiso.get(i - 1).getX() + 90 + imagenes.tuberiaPiso().getWidth()));
             }
         }
         añadido = true;
-    }
-
-    public void añadirTuberiaTecho() {
-        for (int i = 0; i < tuberiasPiso.size() && !tuberiaCompletada; i++) {
-            tuberiasTecho.add(generarTuberiaTecho(i));
-        }
-        tuberiaCompletada = true;
-    }
-
-    public Rectangle2D generarTuberiaTecho(int i) {
-        double pipeHeight = 530 - 150 - tuberiasPiso.get(i).getHeight();
-        double pipeWidth = 80;
-        return figuras.rectangulo(tuberiasPiso.get(i).getX(), 0, pipeWidth, pipeHeight);
     }
 
     public void moverTuberiasPiso() {
@@ -146,7 +143,7 @@ public class PanelJuego extends JPanel {
         if (tuberiasPiso.get(i).getX() + tuberiasPiso.get(i).getWidth() < 0) {
             tuberiasPiso.remove(i);
             buscarCoordenadaMayorPiso();
-            tuberiasPiso.add(i, generarTuberiaPiso(coordMayorPiso + 150 + imagenes.tuberiaPiso().getWidth()));
+            tuberiasPiso.add(i, generarTuberiaPiso(coordMayorPiso + 90 + imagenes.tuberiaPiso().getWidth()));
 
             System.out.println(tuberiasPiso.get(i).getY());
         }
@@ -164,11 +161,17 @@ public class PanelJuego extends JPanel {
         }
     }
 
-    public Rectangle2D generarTuberiaPiso(double x) {
-        int pipeHeight = (int) (Math.random() * (300 - 130 + 1) + 130);
+    public Rectangle2D generarTuberiaTecho(int i) {
+        double pipeHeight = 530 - 150 - tuberiasPiso.get(i).getHeight();
         double pipeWidth = 80;
-        double y = 530 - pipeHeight;
-        return figuras.rectangulo(x, y, pipeWidth, pipeHeight);
+        return figuras.rectangulo(tuberiasPiso.get(i).getX(), 0, pipeWidth, pipeHeight);
+    }
+
+    public void añadirTuberiaTecho() {
+        for (int i = 0; i < tuberiasPiso.size() && !tuberiaCompletada; i++) {
+            tuberiasTecho.add(generarTuberiaTecho(i));
+        }
+        tuberiaCompletada = true;
     }
 
     public void moverTuberiasTecho() {
@@ -224,22 +227,22 @@ public class PanelJuego extends JPanel {
     public void dibujarTuberias(Graphics2D graphics2D) {
         try {
             for (int i = 0; i < tuberiasPiso.size() && i < tuberiasTecho.size(); i++) {
-                graphics2D.setPaint(texturaTuberia(tuberiasPiso.get(i), imagenes.tuberiaPiso()));
+                graphics2D.setPaint(texturaTuberiaPiso(tuberiasPiso.get(i), imagenes.tuberiaPiso()));
                 graphics2D.fill(tuberiasPiso.get(i));
-                graphics2D.setPaint(texturaTuberia(tuberiasTecho.get(i),400, imagenes.tuberiaTecho()));
+                graphics2D.setPaint(texturaTuberiaTecho(tuberiasTecho.get(i), imagenes.tuberiaTecho()));
                 graphics2D.fill(tuberiasTecho.get(i));
             }
         } catch (Exception e) {
 
         }
     }
-    
-    public TexturePaint texturaTuberia(Rectangle2D r, BufferedImage image) {
+
+    public TexturePaint texturaTuberiaPiso(Rectangle2D r, BufferedImage image) {
         return imagenes.crearTexturePaint(image, figuras.rectangulo(r.getX(), r.getY(), 80, 400));
     }
-    
-    public TexturePaint texturaTuberia(Rectangle2D r,int i, BufferedImage image) {
-        return imagenes.crearTexturePaint(image, figuras.rectangulo(r.getX(), r.getHeight()-i, 80, 400));
+
+    public TexturePaint texturaTuberiaTecho(Rectangle2D r, BufferedImage image) {
+        return imagenes.crearTexturePaint(image, figuras.rectangulo(r.getX(), r.getHeight() - 400, 80, 400));
     }
 
     public void dibujarPiso(Graphics2D graphics2D) {
