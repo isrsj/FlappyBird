@@ -26,7 +26,7 @@ public class PanelJuego extends JPanel {
     PerdidaJuego perdidaJuego = new PerdidaJuego();
 
     private int avancePajaro, tiempoSubida, movimientoPaisaje, movimientoPiso, contUnidades, contDecenas;
-    private Boolean añadido, tuberiaCompletada, puntajeContado;
+    private Boolean añadido, tuberiaCompletada, puntajeContado, estaPerdido;
     private double caidaPajaro, coordMayorPiso, coordMayorTecho;
     private ArrayList<Rectangle2D> tuberiasPiso, tuberiasTecho;
     private Timer timer;
@@ -45,6 +45,7 @@ public class PanelJuego extends JPanel {
         añadido = false;
         tuberiaCompletada = false;
         puntajeContado = false;
+        estaPerdido = false;
         tuberiasPiso = new ArrayList<Rectangle2D>();
         tuberiasTecho = new ArrayList<Rectangle2D>();
         animacion();
@@ -77,14 +78,16 @@ public class PanelJuego extends JPanel {
     }
 
     public void pararAnimacion() {
-//        if (perdidaJuego.estaFueraDelPanel(caidaPajaro)) {
-//            timer.stop();
-//        }
-//        for (int i = 0; i < tuberiasTecho.size() && i < tuberiasTecho.size(); i++) {
-//            if (perdidaJuego.choqueConTuberia(figuras.getCuerpoPajaro(), tuberiasTecho.get(i)) || perdidaJuego.choqueConTuberia(figuras.getCuerpoPajaro(), tuberiasPiso.get(i))) {
-//                timer.stop();
-//            }
-//        }
+        if (perdidaJuego.estaFueraDelPanel(caidaPajaro)) {
+            timer.stop();
+            estaPerdido = true;
+        }
+        for (int i = 0; i < tuberiasTecho.size() && i < tuberiasTecho.size(); i++) {
+            if (perdidaJuego.choqueConTuberia(figuras.getCuerpoPajaro(), tuberiasTecho.get(i)) || perdidaJuego.choqueConTuberia(figuras.getCuerpoPajaro(), tuberiasPiso.get(i))) {
+                timer.stop();
+                estaPerdido = true;
+            }
+        }
     }
 
     public void caidaPajaro() {
@@ -104,22 +107,22 @@ public class PanelJuego extends JPanel {
             teclado.setSpace(false);
         }
     }
-    
+
     public void aumentarUnidades() {
         for (int i = 0; i < tuberiasPiso.size(); i++) {
             if (tuberiasPiso.get(i).getX() < figuras.getCuerpoPajaro().getX() && !puntajeContado) {
-                contUnidades ++;
+                contUnidades++;
                 puntajeContado = true;
             }
         }
     }
-    
+
     public void aumentarDecenas() {
         if (contUnidades == 10) {
             contUnidades = 0;
-            contDecenas ++;
+            contDecenas++;
         }
-        System.out.println(contDecenas+"   "+contUnidades);
+        System.out.println(contDecenas + "   " + contUnidades);
     }
 
     public void moverFondo() {
@@ -177,7 +180,7 @@ public class PanelJuego extends JPanel {
         if (tuberiasPiso.get(i).getX() + tuberiasPiso.get(i).getWidth() < 0) {
             tuberiasPiso.remove(i);
             buscarCoordenadaMayorPiso();
-            tuberiasPiso.add(i, generarTuberiaPiso(coordMayorPiso +110 + imagenes.tuberiaPiso().getWidth()));
+            tuberiasPiso.add(i, generarTuberiaPiso(coordMayorPiso + 110 + imagenes.tuberiaPiso().getWidth()));
             puntajeContado = false;
         }
     }
@@ -247,6 +250,7 @@ public class PanelJuego extends JPanel {
         dibujarPiso(graphics2D);
         dibujarPajaro(graphics2D);
         dibujarPuntaje(graphics2D);
+        dibujarGameOver(graphics2D);
     }
 
     public void dibujarFondo(Graphics2D graphics2D) {
@@ -297,16 +301,16 @@ public class PanelJuego extends JPanel {
         figuras.setCuerpoPajaro(avancePajaro, caidaPajaro, 34, 24);
         return imagenes.crearTexturePaint(imagenes.pajaro(), figuras.getCuerpoPajaro());
     }
-    
-    public void dibujarPuntaje(Graphics2D graphics2D){
-        Rectangle2D rUnidades = figuras.rectangulo((this.getWidth()/2)+15 , 30, 30, 45);
-        Rectangle2D rDecenas = figuras.rectangulo((this.getWidth()/2)-15 , 30, 30, 45);
-        graphics2D.setPaint(texturePaintNumero(contDecenas,rDecenas));
+
+    public void dibujarPuntaje(Graphics2D graphics2D) {
+        Rectangle2D rUnidades = figuras.rectangulo((this.getWidth() / 2) + 15, 30, 30, 45);
+        Rectangle2D rDecenas = figuras.rectangulo((this.getWidth() / 2) - 15, 30, 30, 45);
+        graphics2D.setPaint(texturePaintNumero(contDecenas, rDecenas));
         graphics2D.fill(rDecenas);
-        graphics2D.setPaint(texturePaintNumero(contUnidades,rUnidades));
+        graphics2D.setPaint(texturePaintNumero(contUnidades, rUnidades));
         graphics2D.fill(rUnidades);
     }
-    
+
     public TexturePaint texturePaintNumero(int numero, Rectangle2D rectangle) {
         switch (numero) {
             case 0 -> {
@@ -341,6 +345,12 @@ public class PanelJuego extends JPanel {
             }
         }
         return null;
+    }
+
+    public void dibujarGameOver(Graphics2D graphics2D) {
+        if (estaPerdido) {
+            graphics2D.drawImage(imagenes.gameOver(), 20, this.getHeight() / 2 - 80, 450, 100, this);
+        }
     }
 
 }

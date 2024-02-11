@@ -46,6 +46,10 @@ public class Imagenes {
         return leerImagen (ruta);
     }
     
+    public BufferedImage gameOver() {
+        return leerImagen ("gameover.png");
+    }
+    
     public TexturePaint crearTexturePaint(BufferedImage bufferedImage, Rectangle2D rectangle) {
         return new TexturePaint(bufferedImage, rectangle);
     }
