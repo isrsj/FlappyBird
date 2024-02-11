@@ -29,6 +29,7 @@ public class PanelJuego extends JPanel {
     private Boolean añadido, tuberiaCompletada;
     private double caidaPajaro, coordMayorPiso, coordMayorTecho;
     private ArrayList<Rectangle2D> tuberiasPiso, tuberiasTecho;
+    private Timer timer;
 
     public PanelJuego() {
         this.setLayout(null);
@@ -49,9 +50,10 @@ public class PanelJuego extends JPanel {
     }
 
     public void animacion() {
-        Timer timer = new Timer(10, new ActionListener() {
+        timer = new Timer(10, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                pararAnimacion();
                 // bird
                 caidaPajaro();
                 saltoPajaro();
@@ -63,28 +65,38 @@ public class PanelJuego extends JPanel {
                 añadirTuberiaTecho();
                 moverTuberiasPiso();
                 moverTuberiasTecho();
+                // to paint
                 repaint();
             }
         });
         timer.start();
     }
 
+    public void pararAnimacion() {
+        if (perdidaJuego.estaFueraDelPanel(caidaPajaro)) {
+            timer.stop();
+        }
+        for (int i = 0; i < tuberiasTecho.size() && i < tuberiasTecho.size(); i++) {
+            if (perdidaJuego.choqueConTuberia(figuras.getCuerpoPajaro(), tuberiasTecho.get(i)) || perdidaJuego.choqueConTuberia(figuras.getCuerpoPajaro(), tuberiasPiso.get(i))) {
+                timer.stop();
+            }
+        }
+    }
+
     public void caidaPajaro() {
         avancePajaro = 100;
-        if (!teclado.getSpace() && caidaPajaro < 510 && !perdidaJuego.estaFueraDelPanel(caidaPajaro)) {
-            caidaPajaro += 7;
+        if (!teclado.getSpace() && caidaPajaro < 510) {
+            caidaPajaro += 10;
         }
     }
 
     public void saltoPajaro() {
-        if (!perdidaJuego.estaFueraDelPanel(caidaPajaro)) {
-            if (teclado.getSpace() && caidaPajaro < 510 && tiempoSubida < 25) {
-                caidaPajaro -= 3;
-                tiempoSubida++;
-            } else {
-                teclado.setSpace(false);
-                tiempoSubida = 0;
-            }
+        if (teclado.getSpace() && caidaPajaro < 510 && tiempoSubida < 25) {
+            caidaPajaro -= 2.5;
+            tiempoSubida++;
+        } else {
+            teclado.setSpace(false);
+            tiempoSubida = 0;
         }
     }
 
