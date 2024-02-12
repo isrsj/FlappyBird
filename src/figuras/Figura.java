@@ -6,11 +6,11 @@ import java.awt.geom.Rectangle2D;
  *
  * @author jacob
  */
-public class Figuras {
+public class Figura {
     
     private Rectangle2D cuerpoPajaro;
     
-    public Figuras (){
+    public Figura (){
         cuerpoPajaro = new Rectangle2D.Double();
     }
     

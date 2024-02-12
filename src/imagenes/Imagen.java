@@ -12,9 +12,9 @@ import javax.swing.JOptionPane;
  *
  * @author jacob
  */
-public class Imagenes {
+public class Imagen {
 
-    public Imagenes () {
+    public Imagen () {
 
     }
 

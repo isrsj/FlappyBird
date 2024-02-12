@@ -1,6 +1,6 @@
 package paneles;
 
-import imagenes.Imagenes;
+import imagenes.Imagen;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
@@ -14,7 +14,7 @@ import javax.swing.Timer;
  */
 public class PanelInicio extends JPanel {
 
-    Imagenes imagenes = new Imagenes();
+    Imagen imagenes = new Imagen();
 
     private Timer timer;
     private int size;

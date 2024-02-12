@@ -10,7 +10,7 @@ import javax.swing.JFrame;
 public class Main {
 
     public static void main(String[] args) {
-
+        
         JFrame ventana = new JFrame("FLAPPY BIRD");
         PanelJuego panelJuego = new PanelJuego();
         
@@ -20,7 +20,7 @@ public class Main {
         ventana.setLocationRelativeTo(null);
         ventana.add(panelJuego);
         ventana.setVisible(true);
-
+        
     }
 
 }

@@ -1,7 +1,8 @@
 package paneles;
 
-import figuras.Figuras;
-import imagenes.Imagenes;
+import figuras.Figura;
+import imagenes.Audio;
+import imagenes.Imagen;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.TexturePaint;
@@ -9,7 +10,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import teclado.Teclado;
@@ -20,9 +26,10 @@ import teclado.Teclado;
  */
 public class PanelJuego extends JPanel {
 
-    Imagenes imagenes = new Imagenes();
-    Figuras figuras = new Figuras();
+    Imagen imagenes = new Imagen();
+    Figura figuras = new Figura();
     Teclado teclado = new Teclado();
+    Audio audio = new Audio();
     PerdidaJuego perdidaJuego = new PerdidaJuego();
 
     private int avancePajaro, tiempoSubida, movimientoPaisaje, movimientoPiso, contUnidades, contDecenas;
@@ -78,13 +85,15 @@ public class PanelJuego extends JPanel {
     }
 
     public void pararAnimacion() {
-        if (perdidaJuego.estaFueraDelPanel(caidaPajaro)) {
+        if (perdidaJuego.estaFueraDelPanel(caidaPajaro) || caidaPajaro >= 510) {
             timer.stop();
+            audio.playAudio(audio.fileCrashAudio());
             estaPerdido = true;
         }
         for (int i = 0; i < tuberiasTecho.size() && i < tuberiasTecho.size(); i++) {
             if (perdidaJuego.choqueConTuberia(figuras.getCuerpoPajaro(), tuberiasTecho.get(i)) || perdidaJuego.choqueConTuberia(figuras.getCuerpoPajaro(), tuberiasPiso.get(i))) {
                 timer.stop();
+                audio.playAudio(audio.fileCrashAudio());
                 estaPerdido = true;
             }
         }
@@ -98,7 +107,10 @@ public class PanelJuego extends JPanel {
     }
 
     public void saltoPajaro() {
-        if (teclado.getSpace()) {
+        if (tiempoSubida > 0 && tiempoSubida < 2) {
+            audio.playAudio(audio.fileJumpAudio());
+        }
+        if (teclado.getSpace() && caidaPajaro < 510) {
             caidaPajaro -= tiempoSubida;
             tiempoSubida += 1;
         }
@@ -112,6 +124,7 @@ public class PanelJuego extends JPanel {
         for (int i = 0; i < tuberiasPiso.size(); i++) {
             if (tuberiasPiso.get(i).getX() < figuras.getCuerpoPajaro().getX() && !puntajeContado) {
                 contUnidades++;
+                audio.playAudio(audio.filePointAudio());
                 puntajeContado = true;
             }
         }
@@ -122,7 +135,6 @@ public class PanelJuego extends JPanel {
             contUnidades = 0;
             contDecenas++;
         }
-        System.out.println(contDecenas + "   " + contUnidades);
     }
 
     public void moverFondo() {
