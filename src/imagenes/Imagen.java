@@ -30,8 +30,8 @@ public class Imagen {
         return leerImagen("floor.png");
     }
     
-    public BufferedImage pajaro () {
-        return leerImagen("red_bird.png");
+    public BufferedImage pajaro (String dir) {
+        return leerImagen(dir);
     }
     
     public BufferedImage tuberiaPiso () {

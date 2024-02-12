@@ -32,16 +32,18 @@ public class PanelJuego extends JPanel {
     Audio audio = new Audio();
     PerdidaJuego perdidaJuego = new PerdidaJuego();
 
-    private int avancePajaro, tiempoSubida, movimientoPaisaje, movimientoPiso, contUnidades, contDecenas;
+    private int avancePajaro, tiempoSubida, movimientoPaisaje, movimientoPiso, contUnidades, contDecenas, aleteo;
     private Boolean añadido, tuberiaCompletada, puntajeContado, estaPerdido;
     private double caidaPajaro, coordMayorPiso, coordMayorTecho;
+    private String direccionPajaro;
     private ArrayList<Rectangle2D> tuberiasPiso, tuberiasTecho;
-    private Timer timer;
+    private Timer timer, timerAleteo;
 
     public PanelJuego() {
         this.setLayout(null);
         this.addKeyListener(teclado);
         this.setFocusable(true);
+        direccionPajaro = null;
         caidaPajaro = 30;
         avancePajaro = 0;
         tiempoSubida = 0;
@@ -49,6 +51,7 @@ public class PanelJuego extends JPanel {
         movimientoPiso = 0;
         coordMayorPiso = 0;
         coordMayorTecho = 0;
+        aleteo = 0;
         añadido = false;
         tuberiaCompletada = false;
         puntajeContado = false;
@@ -82,6 +85,13 @@ public class PanelJuego extends JPanel {
             }
         });
         timer.start();
+        timerAleteo = new Timer(100, new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                aleteo ++;
+            }
+        });
+        timerAleteo.start();
     }
 
     public void pararAnimacion() {
@@ -102,7 +112,7 @@ public class PanelJuego extends JPanel {
     public void caidaPajaro() {
         avancePajaro = 100;
         if (!teclado.getSpace() && caidaPajaro < 510) {
-            caidaPajaro += 4;
+            caidaPajaro += 5;
         }
     }
 
@@ -311,7 +321,17 @@ public class PanelJuego extends JPanel {
 
     public TexturePaint texturaPajaro() {
         figuras.setCuerpoPajaro(avancePajaro, caidaPajaro, 34, 24);
-        return imagenes.crearTexturePaint(imagenes.pajaro(), figuras.getCuerpoPajaro());
+        if (aleteo == 1) {
+            return imagenes.crearTexturePaint(imagenes.pajaro("redbird-downflap.png"), figuras.getCuerpoPajaro());
+        }
+        if (aleteo == 2) {
+            return imagenes.crearTexturePaint(imagenes.pajaro("redbird-midflap.png"), figuras.getCuerpoPajaro());
+        }
+        if (aleteo == 3) {
+            aleteo = 0;
+            return imagenes.crearTexturePaint(imagenes.pajaro("redbird-upflap.png"), figuras.getCuerpoPajaro());
+        }
+        return imagenes.crearTexturePaint(imagenes.pajaro("red_bird.png"), figuras.getCuerpoPajaro());
     }
 
     public void dibujarPuntaje(Graphics2D graphics2D) {
