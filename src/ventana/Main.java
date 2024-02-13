@@ -8,7 +8,7 @@ import javax.swing.JFrame;
  * @author jacob
  */
 public class Main {
-
+    
     public static void main(String[] args) {
         
         JFrame ventana = new JFrame("FLAPPY BIRD");

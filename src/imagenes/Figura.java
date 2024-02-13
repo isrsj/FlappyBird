@@ -1,4 +1,4 @@
-package figuras;
+package imagenes;
 
 import java.awt.geom.Rectangle2D;
 
