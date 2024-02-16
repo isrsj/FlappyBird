@@ -12,15 +12,20 @@ import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import teclado.Teclado;
+import ventana.MainInicio;
+import ventana.MainJuego;
 
 /**
  *
  * @author jacob
  */
-public class PanelJuego extends JPanel {
+public class PanelJuego extends JPanel implements Runnable {
 
     Imagen imagenes = new Imagen();
     Audio audio = new Audio();
@@ -31,9 +36,9 @@ public class PanelJuego extends JPanel {
 
     private int avancePajaro, tiempoSubida, movimientoPaisaje, movimientoPiso, contUnidades, contDecenas, aleteo;
     private Boolean añadido, tuberiaCompletada, puntajeContado, estaPerdido;
+    private static Boolean cerrarVentana;
     private double caidaPajaro;
     private ArrayList<Rectangle2D> tuberiasPiso, tuberiasTecho;
-    private Timer timer, timerAleteo;
 
     public PanelJuego() {
         this.setLayout(null);
@@ -51,51 +56,54 @@ public class PanelJuego extends JPanel {
         estaPerdido = false;
         tuberiasPiso = new ArrayList<Rectangle2D>();
         tuberiasTecho = new ArrayList<Rectangle2D>();
-        animacion();
     }
 
-    public void animacion() {
-        timer = new Timer(7, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                pararAnimacion();
-                // bird
-                caidaPajaro();
-                saltoPajaro();
-                // puntaje
-                aumentarUnidades();
-                aumentarDecenas();
-                // background
-                moverFondo();
-                moverPiso();
-                // pipe
-                añadirTuberiaPiso();
-                añadirTuberiaTecho();
-                moverTuberiasPiso();
-                moverTuberiasTecho();
-                // to paint
-                repaint();
-            }
-        });
-        timer.start();
-        timerAleteo = new Timer(30, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                aleteo++;
-            }
-        });
-        timerAleteo.start();
+    @Override
+    public void run() {
+        while (!estaPerdido) {
+            delay(16);
+            pararAnimacion();
+            // bird
+            caidaPajaro();
+            saltoPajaro();
+            aleteo++;
+            // puntaje
+            aumentarUnidades();
+            aumentarDecenas();
+            // background
+            moverFondo();
+            moverPiso();
+            // pipe
+            añadirTuberiaPiso();
+            añadirTuberiaTecho();
+            moverTuberiasPiso();
+            moverTuberiasTecho();
+            // to paint
+            repaint();
+        }
+        
+        delay(1500);
+        MainInicio inicio = new MainInicio(new PanelInicio());
+        inicio.setVisible(true);
+    }
+
+    public void delay(int delay) {
+        try {
+            Thread.sleep(delay);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(PanelJuego.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public void pararAnimacion() {
         if (perdidaJuego.estaFueraDelPanel(caidaPajaro) || caidaPajaro >= 510) {
-            timer.stop();
+            //Poner para cerrarVentana
             audio.playAudio(audio.fileCrashAudio());
             estaPerdido = true;
         }
         for (int i = 0; i < tuberiasTecho.size() && i < tuberiasTecho.size(); i++) {
             if (perdidaJuego.choqueConTuberia(figuras.getCuerpoPajaro(), tuberiasTecho.get(i)) || perdidaJuego.choqueConTuberia(figuras.getCuerpoPajaro(), tuberiasPiso.get(i))) {
-                timer.stop();
+                //Poner para cerrarVentana
                 audio.playAudio(audio.fileCrashAudio());
                 estaPerdido = true;
             }
@@ -303,13 +311,13 @@ public class PanelJuego extends JPanel {
 
     public TexturePaint texturaPajaro() {
         figuras.setCuerpoPajaro(avancePajaro, caidaPajaro, 34, 24);
-        if (aleteo == 1) {
+        if (aleteo >= 7 && aleteo <= 17) {
             return imagenes.crearTexturePaint(imagenes.pajaro("redbird-downflap.png"), figuras.getCuerpoPajaro());
         }
-        if (aleteo == 2) {
+        if (aleteo >= 17 && aleteo <= 27) {
             return imagenes.crearTexturePaint(imagenes.pajaro("redbird-midflap.png"), figuras.getCuerpoPajaro());
         }
-        if (aleteo == 3) {
+        if (aleteo >= 27) {
             aleteo = 0;
             return imagenes.crearTexturePaint(imagenes.pajaro("redbird-upflap.png"), figuras.getCuerpoPajaro());
         }

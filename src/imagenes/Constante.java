@@ -16,4 +16,8 @@ public class Constante {
     
     public final double DISTANCIA_TUBERIAS = 110;
     
+    public final int ANCHO_PANEL = 486;
+    
+    public final int ALTO_PANEL = 663;
+    
 }
