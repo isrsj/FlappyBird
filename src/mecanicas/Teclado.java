@@ -1,4 +1,4 @@
-package teclado;
+package mecanicas;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -9,7 +9,7 @@ import java.awt.event.KeyListener;
  */
 public class Teclado implements KeyListener {
 
-    private static Boolean enter;
+    private Boolean enter;
     private Boolean space;
 
     public Teclado() {

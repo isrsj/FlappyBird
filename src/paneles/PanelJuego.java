@@ -1,14 +1,13 @@
 package paneles;
 
-import imagenes.Figura;
-import imagenes.Audio;
-import imagenes.Constante;
-import imagenes.Imagen;
+import mecanicas.PerdidaJuego;
+import mecanicas.Figura;
+import multimedia.Audio;
+import mecanicas.Constante;
+import multimedia.Imagen;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.TexturePaint;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -16,10 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.Timer;
-import teclado.Teclado;
-import ventana.MainInicio;
-import ventana.MainJuego;
+import mecanicas.Teclado;
 
 /**
  *
@@ -35,12 +31,12 @@ public class PanelJuego extends JPanel implements Runnable {
     PerdidaJuego perdidaJuego = new PerdidaJuego();
 
     private int avancePajaro, tiempoSubida, movimientoPaisaje, movimientoPiso, contUnidades, contDecenas, aleteo;
-    private Boolean añadido, tuberiaCompletada, puntajeContado, estaPerdido;
-    private static Boolean cerrarVentana;
+    private Boolean añadido, tuberiaCompletada, puntajeContado, estaPerdido, tieneTextura;
     private double caidaPajaro;
+    private JFrame frame;
     private ArrayList<Rectangle2D> tuberiasPiso, tuberiasTecho;
 
-    public PanelJuego() {
+    public PanelJuego(JFrame frame) {
         this.setLayout(null);
         this.addKeyListener(teclado);
         this.setFocusable(true);
@@ -53,9 +49,11 @@ public class PanelJuego extends JPanel implements Runnable {
         añadido = false;
         tuberiaCompletada = false;
         puntajeContado = false;
+        tieneTextura = false;
         estaPerdido = false;
         tuberiasPiso = new ArrayList<Rectangle2D>();
         tuberiasTecho = new ArrayList<Rectangle2D>();
+        this.frame = frame;
     }
 
     @Override
@@ -81,10 +79,18 @@ public class PanelJuego extends JPanel implements Runnable {
             // to paint
             repaint();
         }
-        
-        delay(1500);
-        MainInicio inicio = new MainInicio(new PanelInicio());
-        inicio.setVisible(true);
+        delay(3000);
+        cargarPanel();
+    }
+
+    public void cargarPanel() {
+        PanelInicio inicio = new PanelInicio(frame);
+        Thread thread = new Thread(inicio);
+        frame.add(inicio);
+        frame.remove(this);
+        frame.setVisible(true);
+
+        thread.start();
     }
 
     public void delay(int delay) {
@@ -96,11 +102,13 @@ public class PanelJuego extends JPanel implements Runnable {
     }
 
     public void pararAnimacion() {
+        //Revisado
         if (perdidaJuego.estaFueraDelPanel(caidaPajaro) || caidaPajaro >= 510) {
             //Poner para cerrarVentana
             audio.playAudio(audio.fileCrashAudio());
             estaPerdido = true;
         }
+        //Revisado
         for (int i = 0; i < tuberiasTecho.size() && i < tuberiasTecho.size(); i++) {
             if (perdidaJuego.choqueConTuberia(figuras.getCuerpoPajaro(), tuberiasTecho.get(i)) || perdidaJuego.choqueConTuberia(figuras.getCuerpoPajaro(), tuberiasPiso.get(i))) {
                 //Poner para cerrarVentana
@@ -132,8 +140,8 @@ public class PanelJuego extends JPanel implements Runnable {
     }
 
     public void aumentarUnidades() {
-        for (int i = 0; i < tuberiasPiso.size(); i++) {
-            if (tuberiasPiso.get(i).getX() < figuras.getCuerpoPajaro().getX() && !puntajeContado) {
+        for (int i = 0; i < tuberiasPiso.size() && !puntajeContado; i++) {
+            if (tuberiasPiso.get(i).getX() < figuras.getCuerpoPajaro().getX()) {
                 contUnidades++;
                 audio.playAudio(audio.filePointAudio());
                 puntajeContado = true;
@@ -171,6 +179,7 @@ public class PanelJuego extends JPanel implements Runnable {
     }
 
     public void añadirTuberiaPiso() {
+        // Revisado
         for (int i = 0; i < 5 && !añadido; i++) {
             if (tuberiasPiso.isEmpty()) {
                 tuberiasPiso.add(i, generarTuberiaPiso(376));
@@ -202,6 +211,7 @@ public class PanelJuego extends JPanel implements Runnable {
     }
 
     public void moverTuberiasPiso() {
+        // Revisado
         for (int i = 0; i < tuberiasPiso.size(); i++) {
             tuberiasPiso.set(i, modificarTuberia(tuberiasPiso.get(i)));
             reemplazarTuberiaPiso(i);
@@ -233,6 +243,7 @@ public class PanelJuego extends JPanel implements Runnable {
     }
 
     public double buscarCoordenadaMayor(ArrayList<Rectangle2D> arrayList) {
+        //Revisado
         double coordMayor = 0;
         for (int i = 0; i < arrayList.size(); i++) {
             if (coordMayor == 0) {
@@ -276,7 +287,7 @@ public class PanelJuego extends JPanel implements Runnable {
 
     public void dibujarTuberias(Graphics2D graphics2D) {
         try {
-            for (int i = 0; i < tuberiasPiso.size() && i < tuberiasTecho.size(); i++) {
+            for (int i = 0; i < tuberiasPiso.size() && i < tuberiasTecho.size() ; i++) {
                 graphics2D.setPaint(texturaTuberiaPiso(tuberiasPiso.get(i), imagenes.tuberiaPiso()));
                 graphics2D.fill(tuberiasPiso.get(i));
                 graphics2D.setPaint(texturaTuberiaTecho(tuberiasTecho.get(i), imagenes.tuberiaTecho()));
@@ -311,13 +322,13 @@ public class PanelJuego extends JPanel implements Runnable {
 
     public TexturePaint texturaPajaro() {
         figuras.setCuerpoPajaro(avancePajaro, caidaPajaro, 34, 24);
-        if (aleteo >= 7 && aleteo <= 17) {
+        if (aleteo >= 1 && aleteo <= 11) {
             return imagenes.crearTexturePaint(imagenes.pajaro("redbird-downflap.png"), figuras.getCuerpoPajaro());
         }
-        if (aleteo >= 17 && aleteo <= 27) {
+        if (aleteo >= 11 && aleteo <= 21) {
             return imagenes.crearTexturePaint(imagenes.pajaro("redbird-midflap.png"), figuras.getCuerpoPajaro());
         }
-        if (aleteo >= 27) {
+        if (aleteo >= 21 && aleteo <= 41) {
             aleteo = 0;
             return imagenes.crearTexturePaint(imagenes.pajaro("redbird-upflap.png"), figuras.getCuerpoPajaro());
         }
@@ -334,39 +345,7 @@ public class PanelJuego extends JPanel implements Runnable {
     }
 
     public TexturePaint texturePaintNumero(int numero, Rectangle2D rectangle) {
-        switch (numero) {
-            case 0 -> {
-                return imagenes.crearTexturePaint(imagenes.numero("0.png"), rectangle);
-            }
-            case 1 -> {
-                return imagenes.crearTexturePaint(imagenes.numero("1.png"), rectangle);
-            }
-            case 2 -> {
-                return imagenes.crearTexturePaint(imagenes.numero("2.png"), rectangle);
-            }
-            case 3 -> {
-                return imagenes.crearTexturePaint(imagenes.numero("3.png"), rectangle);
-            }
-            case 4 -> {
-                return imagenes.crearTexturePaint(imagenes.numero("4.png"), rectangle);
-            }
-            case 5 -> {
-                return imagenes.crearTexturePaint(imagenes.numero("5.png"), rectangle);
-            }
-            case 6 -> {
-                return imagenes.crearTexturePaint(imagenes.numero("6.png"), rectangle);
-            }
-            case 7 -> {
-                return imagenes.crearTexturePaint(imagenes.numero("7.png"), rectangle);
-            }
-            case 8 -> {
-                return imagenes.crearTexturePaint(imagenes.numero("8.png"), rectangle);
-            }
-            case 9 -> {
-                return imagenes.crearTexturePaint(imagenes.numero("9.png"), rectangle);
-            }
-        }
-        return null;
+        return imagenes.crearTexturePaint(imagenes.numero(String.valueOf(numero)+".png"), rectangle);
     }
 
     public void dibujarGameOver(Graphics2D graphics2D) {

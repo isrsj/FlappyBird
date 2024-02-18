@@ -1,4 +1,4 @@
-package imagenes;
+package multimedia;
 
 import java.io.File;
 import java.io.IOException;

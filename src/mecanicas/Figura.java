@@ -1,4 +1,4 @@
-package imagenes;
+package mecanicas;
 
 import java.awt.geom.Rectangle2D;
 

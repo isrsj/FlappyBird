@@ -1,17 +1,14 @@
 package paneles;
 
-import imagenes.Constante;
-import imagenes.Imagen;
+import mecanicas.Constante;
+import multimedia.Imagen;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.Timer;
-import teclado.Teclado;
-import ventana.MainInicio;
-import ventana.MainJuego;
+import mecanicas.Teclado;
 
 /**
  *
@@ -27,16 +24,9 @@ public class PanelInicio extends JPanel implements Runnable {
     private JFrame frame;
     private Boolean imagenMaximizada;
 
-    public PanelInicio() {
-        this.setLayout(null);
-        size = 200;
-        imagenMaximizada = false;
-        this.addKeyListener(teclado);
-        this.setFocusable(true);
-    }
-    
     public PanelInicio(JFrame frame) {
         this.setLayout(null);
+        this.frame = frame;
         size = 200;
         imagenMaximizada = false;
         this.addKeyListener(teclado);
@@ -46,17 +36,25 @@ public class PanelInicio extends JPanel implements Runnable {
     @Override
     public void run() {
         while (!teclado.getEnter()) {
-            delay();
+            delay(10);
             animarImagen();
             repaint();
         }
-        MainInicio inicio = new MainInicio(new PanelJuego());
-        inicio.setVisible(true);
+        cargarPanel();
     }
 
-    public void delay() {
+    public void cargarPanel() {
+        PanelJuego juego = new PanelJuego(frame);
+        Thread thread = new Thread(juego);
+        frame.add(juego);
+        frame.remove(this);
+        frame.setVisible(true);
+        thread.start();
+    }
+
+    public void delay(int delay) {
         try {
-            Thread.sleep(10);
+            Thread.sleep(delay);
         } catch (InterruptedException ex) {
             Logger.getLogger(PanelInicio.class.getName()).log(Level.SEVERE, null, ex);
         }

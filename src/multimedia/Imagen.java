@@ -1,4 +1,4 @@
-package imagenes;
+package multimedia;
 
 import java.awt.TexturePaint;
 import java.awt.geom.Rectangle2D;
